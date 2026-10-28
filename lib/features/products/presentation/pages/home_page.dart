@@ -7,18 +7,10 @@ import '../../../../core/theme/theme_context.dart';
 import '../../../../core/widgets/app_logo.dart';
 import '../../../../core/widgets/brand_header.dart';
 import '../../../auth/presentation/provider/auth_provider.dart';
-import '../../domain/entities/product_sort.dart';
 import '../provider/product_list_provider.dart';
 import '../widgets/paged_product_grid.dart';
-
-extension on ProductSort {
-  String get label => switch (this) {
-    ProductSort.none => 'Default',
-    ProductSort.priceLowToHigh => 'Price: Low to High',
-    ProductSort.priceHighToLow => 'Price: High to Low',
-    ProductSort.topRated => 'Top Rated',
-  };
-}
+import '../widgets/product_search_field.dart';
+import '../widgets/product_sort_button.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -133,7 +125,7 @@ class _HomeHeader extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _SearchField(
+                child: ProductSearchField(
                   controller: controller,
                   focusNode: focusNode,
                   onChanged: onChanged,
@@ -141,7 +133,7 @@ class _HomeHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.s),
-              const _SortButton(),
+              const ProductSortButton<ProductListProvider>(),
             ],
           ),
         ],
@@ -192,85 +184,4 @@ class _HomeHeader extends StatelessWidget {
       ],
     );
   }
-}
-
-class _SortButton extends StatelessWidget {
-  const _SortButton();
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = context.read<ProductListProvider>();
-    return Selector<ProductListProvider, ProductSort>(
-      selector: (_, products) => products.sort,
-      builder: (context, sort, _) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: context.colors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radius),
-        ),
-        child: PopupMenuButton<ProductSort>(
-          tooltip: 'Sort',
-          initialValue: sort,
-          onSelected: provider.setSort,
-          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-          icon: Badge(
-            isLabelVisible: sort != ProductSort.none,
-            smallSize: 8,
-            child: Icon(Icons.tune_rounded, color: context.colors.primary),
-          ),
-          itemBuilder: (_) => [
-            for (final option in ProductSort.values)
-              CheckedPopupMenuItem(
-                value: option,
-                checked: option == sort,
-                child: Text(option.label),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SearchField extends StatelessWidget {
-  const _SearchField({
-    required this.controller,
-    required this.focusNode,
-    required this.onChanged,
-    required this.onClear,
-  });
-
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final ValueChanged<String> onChanged;
-  final VoidCallback onClear;
-
-  @override
-  Widget build(BuildContext context) => TextField(
-    controller: controller,
-    focusNode: focusNode,
-    onChanged: onChanged,
-    textInputAction: TextInputAction.search,
-    decoration: InputDecoration(
-      hintText: 'Search products',
-      prefixIcon: const Icon(Icons.search_rounded),
-      border: _noBorder,
-      enabledBorder: _noBorder,
-      focusedBorder: _noBorder,
-      suffixIcon: ValueListenableBuilder<TextEditingValue>(
-        valueListenable: controller,
-        builder: (context, value, _) => value.text.isEmpty
-            ? const SizedBox.shrink()
-            : IconButton(
-                tooltip: 'Clear search',
-                icon: const Icon(Icons.close_rounded),
-                onPressed: onClear,
-              ),
-      ),
-    ),
-  );
-
-  static final _noBorder = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(AppSpacing.radius),
-    borderSide: BorderSide.none,
-  );
 }
