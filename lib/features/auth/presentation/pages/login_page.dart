@@ -143,11 +143,6 @@ class _LoginViewState extends State<_LoginView> {
           ),
         ),
         const SizedBox(height: AppSpacing.m),
-        Text(
-          'Demo account: emilys / emilyspass',
-          textAlign: TextAlign.center,
-          style: context.captionStyle,
-        ),
       ],
     ),
   );
